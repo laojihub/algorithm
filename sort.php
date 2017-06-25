@@ -57,11 +57,11 @@ function insertSort(array $arr)
     for ($i = 1; $i < $total; $i++) {
         $temp = $arr[$i];
         //已排序的最大索引
-        $j = $i -1;
+        $j = $i - 1;
         //从高位开始比较，如果比$temp大，右移，直到找到比$temp小的位置
-        while($j >= 0 && $arr[$j] > $temp) {
-            $arr[$j+1] = $arr[$j];
-            $j --;
+        while ($j >= 0 && $arr[$j] > $temp) {
+            $arr[$j + 1] = $arr[$j];
+            $j--;
         }
         //放到合适位置
         $arr[$j + 1] = $temp;
@@ -78,9 +78,9 @@ function shellSort(array $arr)
 {
     $total = count($arr);
     $step = 2;
-    for($gap = floor($total / $step); $gap > 0 ; $gap = floor($gap / $step)) {
-        for($i = $gap; $i < $total; $i++) {
-            for($j = $i - $gap; $j>=0 && $arr[$j+$gap] < $arr[$j] ; $j -= $gap) {
+    for ($gap = floor($total / $step); $gap > 0; $gap = floor($gap / $step)) {
+        for ($i = $gap; $i < $total; $i++) {
+            for ($j = $i - $gap; $j >= 0 && $arr[$j + $gap] < $arr[$j]; $j -= $gap) {
                 $temp = $arr[$j];
                 $arr[$j] = $arr[$j + $gap];
                 $arr[$j + $gap] = $temp;
@@ -168,7 +168,87 @@ function quickSort($arr)
     return array_merge($left, array($first), $right);
 }
 
+/**
+ * 基数排序 LSD
+ * @param array $arr
+ */
+function radixSort(array &$arr)
+{
+    //最大数
+    $max = max($arr);
+    //最大位数
+    $len = strlen($max);
+    //基数依次排序
+    for ($i = 1; $i <= $len; $i++) {
+        radixMain($arr, $i);
+    }
+}
+
+function radixMain(array &$arr, $loop)
+{
+    //个百位 依次为 1 10 100……
+    $pos = pow(10, $loop - 1);
+
+    $count = count($arr);
+    //初始化桶
+    $temp = array_fill(0, $count, 0);
+    //根据 $loop位 放入桶中
+    for ($i = 0; $i < $count; $i++) {
+        $index = intval(($arr[$i] / $pos) % 10);
+
+        if (is_array($temp[$index])) {
+            $temp[$index][] = $arr[$i];
+        } else {
+            $temp[$index] = [$arr[$i]];
+        }
+    }
+    //按在桶中顺序取出
+    $k = 0;
+    foreach ($temp as $values) {
+        if ($values == 0) continue;
+        foreach ($values as $v) {
+            $arr[$k++] = $v;
+        }
+    }
+    unset($temp);
+}
 
 
+/**
+ * 堆排序
+ * @param array $arr
+ */
+function heapSort(array &$arr)
+{
+    $count = count($arr);
 
+    for ($i = floor($count / 2) - 1; $i >= 0; $i--) {
+        headAdjust($arr, $i, $count);
+    }
 
+    for ($i = $count - 1; $i >= 0; $i--) {
+        $temp = $arr[0];
+        $arr[0] = $arr[$i];
+        $arr[$i] = $temp;
+        headAdjust($arr, 0, $i);
+    }
+}
+
+function headAdjust(array &$arr, $i, $count)
+{
+    for (; 2 * $i + 1 < $count; $i = $child) {
+        $child = 2 * $i + 1;
+
+        if ($child < $count - 1 && $arr[$child + 1] > $arr[$child]) {
+            $child++;
+        }
+
+        if ($arr[$i] < $arr[$child]) {
+            $temp = $arr[$i];
+            $arr[$i] = $arr[$child];
+            $arr[$child] = $temp;
+        } else {
+            break;
+        }
+    }
+}
